@@ -8,12 +8,15 @@
 
 #include "test.h"
 #include <stdlib.h>
+#include <iostream>
+using namespace std;
 
 int main(int argn, char* argv[]) {
 
-	testNetwork();
-	testMultilayerNetwork();
-	testMultiplex();
+//	testNetwork();
+//	testMultilayerNetwork();
+//	testMultiplex();
+	testMultipleNetwork();
 	//testIO();
 	//testMeasures();
 	//testModularity(); //Still testing this, but seems to work (it does for single networks)
@@ -21,7 +24,7 @@ int main(int argn, char* argv[]) {
 	//testRandom();
 	//testTransformations();
 
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 

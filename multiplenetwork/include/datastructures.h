@@ -2,6 +2,7 @@
  * datastructures.h
  *
  * Author: Matteo Magnani <matteo.magnani@it.uu.se>
+ * Author: Payam Siyari <payamsiyari@gmail.com>
  * Version: 0.0.1
  *
  * This file defines the basic data structures composing networks ("vertex_id" and
@@ -16,16 +17,15 @@
  * vertexes, where the path can traverse multiple networks, are also defined here.
  *
  * BASIC TYPES: network_id, vertex_id, edge_id, global_vertex_id, global_edge_id
- * CLASSES: Network, Multiple Network, Path
+ * CLASSES: Network, MultilayerNetwork, Multiplex, MultipleNetwork, Path
  */
 
-/*Test Pushing to GitHub by Payam*/
-/*Test Fork Commit*/
 #ifndef MULTIPLENETWORK_DATASTRUCTURES_H_
 #define MULTIPLENETWORK_DATASTRUCTURES_H_
 
 #include "types.h"
 #include <string>
+#include <iostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -814,22 +814,46 @@ void print(Multiplex& mnet);
 /**********************************************************************/
 class MultipleNetwork : public MultilayerNetwork {
 public:
-	/** Creates an empty network (with 0 internal networks) */
+	/** Creates an empty undirected network*/
 	MultipleNetwork();
+	/** Creates an empty network (with 0 internal networks) */
+	MultipleNetwork(bool directed);
 	/** */
 	~MultipleNetwork();
 	/**
 	 * @brief Creates a link between two vertexes on different networks.
-	 * All interlayer connections are directed (TODO is this OK?)
+	 * All interlayer connections are directed (TODO is this OK? //By Payam: not necessarily)
 	 * @throws ElementNotFoundException if the input elements are not present in the network
 	 * @throws OperationNotSupportedException if the two vertexes lay on the same network
 	 **/
-	void newInterlayerConnection(global_vertex_id v1, global_vertex_id v2);
+	interlayer_edge_id newInterlayerConnection(global_vertex_id v1, global_vertex_id v2);
 	/**
 	 * @brief Inserts into "connections" all the edge identifiers of interlayer connections.
 	 **/
 	void getInterlayerConnections(std::set<interlayer_edge_id>& connections) const;
-
+	/**
+	 * @brief Returns the number of global edges.
+	 * @overrides MultilayerNetwork::getNumEdges
+	 * This function corresponds to computing the sum of the number of edges in each single network
+	 * plus the number of interlayer connections between them.
+	 * In an undirected networks an edge a-b is counted only once (not twice by also considering b-a).
+	 * N.B. This can create some confusion when some local networks are directed and some are undirected.
+	 **/
+	long getNumEdges() const;
+	/**
+	 * @brief Returns the number of Interlayer connections.
+	 **/
+	long getNumInterlayerConnections() const;
+	/**
+	 * @brief Returns true if the multiple network is directed
+	 */
+	bool isDirected() const ;
+private:
+	/* Interlayer connections (in an undirected network these two maps contain the same values) */
+	std::map<global_vertex_id, std::set<global_vertex_id> > out_interlayer_edges;
+	std::map<global_vertex_id, std::set<global_vertex_id> > in_interlayer_edges;
+	bool is_directed;
+	long num_interlayer_connections;
 };
 
 void print(MultipleNetwork& mnet);
