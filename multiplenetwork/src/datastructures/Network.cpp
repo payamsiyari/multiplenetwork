@@ -10,11 +10,15 @@
 #include <iostream>
 
 Network::Network() {
-	Network(false,false,false);
+	this->Initializer(false,false,false);
 }
 
 Network::Network(bool named, bool directed, bool weighed) {
-	max_vertex_id=-1;
+	this->Initializer(named, directed, weighed);
+}
+
+void Network::Initializer(bool named, bool directed, bool weighed) {
+	this->max_vertex_id=-1;
 	num_edges=0;
 	is_named=named;
 	is_weighed=weighed;
@@ -31,8 +35,8 @@ Network::~Network() {
 
 vertex_id Network::addVertex() {
 	if (isNamed()) throw OperationNotSupportedException("Cannot add an anonymous vertex to a named network");
-	max_vertex_id++;
-	vertex_id new_vertex_id = max_vertex_id;
+	this->max_vertex_id++;
+	vertex_id new_vertex_id = this->max_vertex_id;
 	vertexes.insert(new_vertex_id);
 	return new_vertex_id;
 }
@@ -40,8 +44,8 @@ vertex_id Network::addVertex() {
 vertex_id Network::addVertex(const std::string& vertex_name) {
 	if (containsVertex(vertex_name)) throw DuplicateElementException("Vertex " + vertex_name + " already exists");
 	if (!isNamed()) throw OperationNotSupportedException("Cannot add a named vertex to an unnamed network");
-	max_vertex_id++;
-	vertex_id new_vertex_id = max_vertex_id;
+	this->max_vertex_id++;
+	vertex_id new_vertex_id = this->max_vertex_id;
 	vertexes.insert(new_vertex_id);
 	vertex_id_to_name[new_vertex_id] = vertex_name;
 	vertex_name_to_id[vertex_name] = new_vertex_id;

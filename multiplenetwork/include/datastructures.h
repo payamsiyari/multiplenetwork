@@ -597,6 +597,7 @@ private:
 	std::map<std::string, std::map<edge_id, std::string> > edge_string_attribute;
 	std::map<std::string, std::map<vertex_id, double> > vertex_numeric_attribute;
 	std::map<std::string, std::map<edge_id, double> > edge_numeric_attribute;
+	void Initializer(bool,bool,bool);
 };
 
 void print(Network& net);
@@ -828,6 +829,18 @@ public:
 	 **/
 	interlayer_edge_id newInterlayerConnection(global_vertex_id v1, global_vertex_id v2);
 	/**
+	 * @brief Inserts into "neighbors" the identifiers of all interlayer vertexes with an edge form "vid".
+	 **/
+	void getOutInterlayerNeighbors(global_vertex_id vid, std::set<global_vertex_id>& neighbors) const;
+	/**
+	 * @brief Inserts into "neighbors" the identifiers of all interlayer vertexes with an edge towards "vid".
+	 **/
+	void getInInterlayerNeighbors(global_vertex_id vid, std::set<global_vertex_id>& neighbors) const;
+	/**
+	 * @brief Inserts into "neighbors" the identifiers of all interlayer vertexes with an edge from or towards "vid".
+	 **/
+	void getInterlayerNeighbors(global_vertex_id vid, std::set<global_vertex_id>& neighbors) const;
+	/**
 	 * @brief Inserts into "connections" all the edge identifiers of interlayer connections.
 	 **/
 	void getInterlayerConnections(std::set<interlayer_edge_id>& connections) const;
@@ -839,7 +852,7 @@ public:
 	 * In an undirected networks an edge a-b is counted only once (not twice by also considering b-a).
 	 * N.B. This can create some confusion when some local networks are directed and some are undirected.
 	 **/
-	long getNumEdges() const;
+	long getNumAllEdges() const;
 	/**
 	 * @brief Returns the number of Interlayer connections.
 	 **/
@@ -854,6 +867,7 @@ private:
 	std::map<global_vertex_id, std::set<global_vertex_id> > in_interlayer_edges;
 	bool is_directed;
 	long num_interlayer_connections;
+	void Initializer(bool);
 };
 
 void print(MultipleNetwork& mnet);
