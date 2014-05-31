@@ -28,7 +28,10 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <queue>
 #include <vector>
+
+using namespace std;
 
 
 /**********************************************************************/
@@ -579,6 +582,14 @@ public:
 	 * @throws ElementNotFoundException if there is no vertex with this name
 	 **/
 	void setNumericEdgeAttribute(const std::string& vertex_name1, const std::string& vertex_name2, const std::string& attribute_name, double value);
+	/**
+	 * @brief Calculates the number of vertexes in greatest connected component.
+	 **/
+	int getGCCSize();
+	/**
+	 * @brief DFS recursion used in getGCCSize().
+	 **/
+	void DFS(vertex_id, vector<bool>&, int&);
 private:
 	// largest vertex identifier assigned so far
 	vertex_id max_vertex_id;

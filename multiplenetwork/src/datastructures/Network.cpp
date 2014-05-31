@@ -9,6 +9,8 @@
 #include "utils.h"
 #include <iostream>
 
+using namespace std;
+
 Network::Network() {
 	this->Initializer(false,false,false);
 }
@@ -440,6 +442,34 @@ void Network::setStringEdgeAttribute(const std::string& vertex_name1, const std:
 	if (!containsVertex(vertex_name1)) throw ElementNotFoundException("Vertex " + vertex_name1);
 	if (!containsVertex(vertex_name2)) throw ElementNotFoundException("Vertex " + vertex_name2);
 	setStringEdgeAttribute(vertex_name_to_id.at(vertex_name1), vertex_name_to_id.at(vertex_name2), attribute_name, val);
+}
+
+int Network::getGCCSize(){
+	//TO DO: Assumes vertex Ids are from 0 to number of vertexes, needs to be fixed.
+	vector<bool> vertexTraverseCheck(getNumVertexes(),false);
+	int gccSize = 0;
+	int nextVertex = 0;
+	for (int i = 0 ; i < vertexTraverseCheck.size() ; i++){
+		if(!vertexTraverseCheck[i]){
+			int tmpComponentSize = 0;
+			DFS(nextVertex, vertexTraverseCheck, tmpComponentSize);
+			if(tmpComponentSize > gccSize)
+				gccSize = tmpComponentSize;
+		}
+	}
+	return gccSize;
+}
+
+void Network::DFS(vertex_id vid, vector<bool>& vertexTraverseCheck, int& componentSize){
+	if(!vertexTraverseCheck[vid]){
+		componentSize++;
+		vertexTraverseCheck[vid] = true;
+		set<vertex_id> neighs;
+		getOutNeighbors(vid, neighs);
+		for(set<vertex_id>::iterator vertIt = neighs.begin() ; vertIt != neighs.end() ; ++vertIt){
+			DFS(*vertIt, vertexTraverseCheck, componentSize);
+		}
+	}
 }
 
 void print(Network& net) {
