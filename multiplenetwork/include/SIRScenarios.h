@@ -25,18 +25,23 @@
 #import "utils.h"
 #include "erErModel.h"
 #include "SIRModel.h"
+#include "readNetFile.h"
 
 using namespace std;
 
 class SIRScenarios{
 public:
-	static void firstScenario();
-	static void firstScenarioRun(SIRModel, string);
-	static void secondScenario();
-	static void secondScenarioRun(SIRModel,string);
-	static void thirdScenario();
-	static void fourthScenario();
-	static void fourthScenarioRun(SIRModel, string, vector<int>);
+	static void scenarioForErErNets();
+	static void scenarioForErErNetsBody(SIRModel, string, vector<int>);
+	static void scenarioForPolBlogs();
+	static void scenarioForPolBlogsBody(SIRModel, vector<int>);
+	static void scenarioForFlickrAndBlogCatalog();
+	static void scFlickrAndBlogCatalogAndSnapBody(SIRModel, vector<int>);
+	static void scenarioForSnapFiles();
+	static void eighthScenarioRun(SIRModel, vector<int>);
+private:
+	static int GetSizeOfLargestInfectedClusterOnLayer(MultipleNetwork&, SIRModel&, network_id);
+	static void DFS(MultipleNetwork&, network_id, vertex_id, vector<bool>&, int&, std::map<network_id,std::map<vertex_id,SIRVertexStatus > >&);
 };
 
 

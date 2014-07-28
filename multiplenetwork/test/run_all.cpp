@@ -18,6 +18,7 @@
 #import "exceptions.h"
 #import "utils.h"
 
+#include "readNetFile.h"
 #include "erErModel.h"
 #include "SIRModel.h"
 #include "SIRScenarios.h"
@@ -26,12 +27,10 @@
 using namespace std;
 
 int main(int argn, char* argv[]) {
-
-
-//	SIRScenarios::firstScenario();
-//	SIRScenarios::secondScenario();
-//	SIRScenarios::thirdScenario();
-	SIRScenarios::fourthScenario();
+	SIRScenarios::scenarioForErErNets();
+//	SIRScenarios::scenarioForPolBlogs();
+//	SIRScenarios::scenarioForFlickrAndBlogCatalog();
+//	SIRScenarios::scenarioForSnapFiles();
 
 //	testNetwork();
 //	testMultilayerNetwork();

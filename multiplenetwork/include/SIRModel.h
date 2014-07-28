@@ -44,10 +44,6 @@ private:
 	unsigned int clock;
 	SIREventQueue queue;
 
-	MultipleNetwork mnet;
-
-	std::map<network_id,std::map<vertex_id,SIRVertexStatus > > vertexesStatus;
-
 	double intra_diffusion_rate;
 	double inter_diffusion_rate;
 	unsigned int infection_timespan;
@@ -62,6 +58,9 @@ private:
 	void GatherInfo();
 	void PrintInfo();
 public:
+	MultipleNetwork mnet;
+	std::map<network_id,std::map<vertex_id,SIRVertexStatus > > vertexesStatus;
+
 	SIRModel(MultipleNetwork, double, double, unsigned int);
 	simulationStats start();
 	simulationStats start(bool, network_id);
@@ -72,6 +71,7 @@ public:
 	void setDiffRates(double, double);
 	double getIntraDiffRate();
 	double getInterDiffRate();
+	std::map<network_id,std::map<vertex_id,SIRVertexStatus > > getVertexesStatus();
 };
 
 #endif /* SIRMODEL_H_ */

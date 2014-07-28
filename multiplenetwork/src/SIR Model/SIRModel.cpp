@@ -187,6 +187,10 @@ double SIRModel::getInterDiffRate(){
 	return inter_diffusion_rate;
 }
 
+std::map<network_id,std::map<vertex_id,SIRVertexStatus > > SIRModel::getVertexesStatus(){
+	return vertexesStatus;
+}
+
 void SIRModel::GatherInfo(){
 	stat.numberOfSusceptibleinTime.push_back(stat.S);
 	stat.numberOfInfectedinTime.push_back(stat.I);

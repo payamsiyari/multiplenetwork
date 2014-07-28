@@ -7,270 +7,22 @@
 
 #include "SIRScenarios.h"
 
-void SIRScenarios::firstScenario(){
-	//Network Generation
-	const int numLayers = 2;
-	int nums[numLayers] = {6000,6000};
-	double avgs[numLayers] = {1.5,6};
-	double intLayer[1][3];
-			intLayer[0][0] = 0;
-			intLayer[0][1] = 1;
-
-	//SIR Model Run
-	int infectionTimeSpan = 2;//Recovery rate
-	double intralayerDiffRate = 0; double interlayerDiffRate = 0;
-
-	intLayer[0][2] = 1.5;//Strongly Connected
-	MultipleNetwork mnet = erErModel::generate_ERER_MultipleNet_AvgDegreeBased(numLayers,nums,avgs,intLayer,1);
-	print(mnet);
-	intralayerDiffRate = 0.9;  interlayerDiffRate = 0.1;//Difference close to 1 case
-	SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "s10");
-	cout << "s10\n";
-	intralayerDiffRate = 0.7;  interlayerDiffRate = 0.2;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "s05");
-	cout << "s05\n";
-	intralayerDiffRate = 0.5;  interlayerDiffRate = 0.5;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "s00");
-	cout << "s00\n";
-
-	intLayer[0][2] = 0.5;//Weekly Connected
-	mnet = erErModel::generate_ERER_MultipleNet_AvgDegreeBased(numLayers,nums,avgs,intLayer,1);
-	print(mnet);
-	intralayerDiffRate = 0.9;  interlayerDiffRate = 0.1;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "w10");
-	cout << "w10\n";
-	intralayerDiffRate = 0.7;  interlayerDiffRate = 0.2;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "w05");
-	cout << "w05\n";
-	intralayerDiffRate = 0.5;  interlayerDiffRate = 0.5;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	firstScenarioRun(sirModel, "w00");
-	cout << "w00\n";
-}
-
-void SIRScenarios::firstScenarioRun(SIRModel sirModel, string filename){
-	vector<vector<int> > avgNumberOfInfectedinLayerPerDiffRate(sirModel.getNetwork().getNumNetworks());
-	for(double i = -0.09 ; i <= 0.09 ; i+=0.01){
-		cout << "i: " << i << " ";
-		sirModel.setDiffRates(sirModel.getIntraDiffRate()+i, sirModel.getInterDiffRate()+i);
-		int numberOfRealizations = 100;
-		std::vector<int> avgNumberOfInfectedinLayer(sirModel.getNetwork().getNumNetworks());
-		for (int i = 0 ; i < numberOfRealizations ; i++){
-			simulationStats runTimeStat = sirModel.start();
-			for(int j = 0 ; j < avgNumberOfInfectedinLayer.size() ; j++){
-				avgNumberOfInfectedinLayer[j] += runTimeStat.RinLayer[j];
-			}
-		}
-		for(int j = 0 ; j < avgNumberOfInfectedinLayer.size() ; j++){
-			avgNumberOfInfectedinLayer[j] /= numberOfRealizations;
-		}
-		for (int j = 0 ; j < sirModel.getNetwork().getNumNetworks() ; j++){
-			avgNumberOfInfectedinLayerPerDiffRate[j].push_back(avgNumberOfInfectedinLayer[j]);
-		}
-	}
-	cout << endl;
-	ofstream myfile;
-	myfile.open ("Sc1-" + filename + ".txt");
-	for (int i = 0 ; i < sirModel.getNetwork().getNumNetworks() ; i++){
-		for (int j = 0 ; j < avgNumberOfInfectedinLayerPerDiffRate[i].size() ; j++)
-			myfile << avgNumberOfInfectedinLayerPerDiffRate[i][j] << "\t";
-		myfile << "\n";
-	}
-	for (int j = 0 ; j < avgNumberOfInfectedinLayerPerDiffRate[0].size() ; j++){
-		int tmpAvg = 0;
-		for (int i = 0 ; i < sirModel.getNetwork().getNumNetworks() ; i++)
-			tmpAvg += avgNumberOfInfectedinLayerPerDiffRate[i][j];
-		myfile << tmpAvg << "\t";
-	}
-	myfile << "\n";
-	myfile.close();
-}
-
-void SIRScenarios::secondScenario(){
-	//Network Generation
-	const int numLayers = 2;
-	int nums[numLayers] = {6000,6000};
-	double avgs[numLayers] = {1.5,6};
-	double intLayer[1][3];
-			intLayer[0][0] = 0;
-			intLayer[0][1] = 1;
-
-	//SIR Model Run
-	int infectionTimeSpan = 2;//Recovery rate
-	double intralayerDiffRate; double interlayerDiffRate;
-
-	intLayer[0][2] = 1.5;//Strongly Connected
-	MultipleNetwork mnet = erErModel::generate_ERER_MultipleNet_AvgDegreeBased(numLayers,nums,avgs,intLayer,1);
-	print(mnet);
-	intralayerDiffRate = 0.9;  interlayerDiffRate = 0.1;//Difference close to 1 case
-	SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"s10");
-	cout << "s10" << endl;
-	intralayerDiffRate = 0.7;  interlayerDiffRate = 0.2;//Difference close to 0.5 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"s05");
-	cout << "s05" << endl;
-	intralayerDiffRate = 0.5;  interlayerDiffRate = 0.5;//Difference close to 0 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"s00");
-	cout << "s00" << endl;
-
-	intLayer[0][2] = 0.5;//Weekly Connected
-	mnet = erErModel::generate_ERER_MultipleNet_AvgDegreeBased(numLayers,nums,avgs,intLayer,1);
-	print(mnet);
-	intralayerDiffRate = 0.9;  interlayerDiffRate = 0.1;//Difference close to 1 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"w10");
-	cout << "w10" << endl;
-	intralayerDiffRate = 0.7;  interlayerDiffRate = 0.2;//Difference close to 0.5 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"w05");
-	cout << "w05" << endl;
-	intralayerDiffRate = 0.5;  interlayerDiffRate = 0.5;//Difference close to 0 case
-	sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
-	secondScenarioRun(sirModel,"w00");
-	cout << "w00" << endl;
-}
-
-void SIRScenarios::secondScenarioRun(SIRModel sirModel, std::string filename){
-	std::vector<int> totalNumberS; std::vector<int> varianceNumberS;
-	std::vector<std::vector<int> > totalNumberSinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-	std::vector<std::vector<int> > varianceNumberSinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-	std::vector<int> totalNumberI; std::vector<int> varianceNumberI;
-	std::vector<std::vector<int> > totalNumberIinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-	std::vector<std::vector<int> > varianceNumberIinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-	std::vector<int> totalNumberR; std::vector<int> varianceNumberR;
-	std::vector<std::vector<int> > totalNumberRinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-	std::vector<std::vector<int> > varianceNumberRinLayer = vector<vector<int> >(sirModel.getNetwork().getNumNetworks());
-//	std::vector<int> timesPresent;
-	int numberOfRealizations = 100;
-	for (int i = 0 ; i < numberOfRealizations ; i++){
-		simulationStats runTimeStat = sirModel.start();
-		if(runTimeStat.numberOfSusceptibleinTime.size() > totalNumberS.size()){
-			totalNumberS.resize(runTimeStat.numberOfSusceptibleinTime.size(),0);
-			varianceNumberS.resize(runTimeStat.numberOfSusceptibleinTime.size(),0);
-			totalNumberI.resize(runTimeStat.numberOfInfectedinTime.size(),0);
-			varianceNumberI.resize(runTimeStat.numberOfInfectedinTime.size(),0);
-			totalNumberR.resize(runTimeStat.numberOfRemovedinTime.size(),0);
-			varianceNumberR.resize(runTimeStat.numberOfRemovedinTime.size(),0);
-//			timesPresent.resize(runTimeStat.timeStamp.size(),0);
-		}
-		std::list<int>::iterator listItNumSuc=runTimeStat.numberOfSusceptibleinTime.begin();
-		std::list<int>::iterator listItNumInf=runTimeStat.numberOfInfectedinTime.begin();
-		std::list<int>::iterator listItNumRem=runTimeStat.numberOfRemovedinTime.begin();
-//		std::list<int>::iterator listItTime=runTimeStat.timeStamp.begin();
-		for (int j = 0 ; listItNumSuc!=runTimeStat.numberOfSusceptibleinTime.end(); ++listItNumSuc, ++listItNumInf, ++listItNumRem, ++j){
-			totalNumberS[j] += *listItNumSuc;
-			varianceNumberS[j] += (int)pow((double)*listItNumSuc,2);
-			totalNumberI[j] += *listItNumInf;
-			varianceNumberI[j] += (int)pow((double)*listItNumInf,2);
-			totalNumberR[j] += *listItNumRem;
-			varianceNumberR[j] += (int)pow((double)*listItNumRem,2);
-//			timesPresent[j]++;
-		}
-		for (int j = 0 ; j < runTimeStat.SinLayer.size() ; j++){
-			if(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size() > totalNumberSinLayer[j].size()){
-				totalNumberSinLayer[j].resize(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size());
-				varianceNumberSinLayer[j].resize(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size());
-				totalNumberIinLayer[j].resize(runTimeStat.numberOfInfectedinTimeinLayer[j].size());
-				varianceNumberIinLayer[j].resize(runTimeStat.numberOfInfectedinTimeinLayer[j].size());
-				totalNumberRinLayer[j].resize(runTimeStat.numberOfRemovedinTimeinLayer[j].size());
-				varianceNumberRinLayer[j].resize(runTimeStat.numberOfRemovedinTimeinLayer[j].size());
-			}
-			std::list<int>::iterator listItNumSucinLayer = runTimeStat.numberOfSusceptibleinTimeinLayer[j].begin();
-			std::list<int>::iterator listItNumInfinLayer = runTimeStat.numberOfInfectedinTimeinLayer[j].begin();
-			std::list<int>::iterator listItNumReminLayer = runTimeStat.numberOfRemovedinTimeinLayer[j].begin();
-			for (int k = 0 ; listItNumSucinLayer != runTimeStat.numberOfSusceptibleinTimeinLayer[j].end() ; ++listItNumSucinLayer, ++listItNumInfinLayer, ++listItNumReminLayer, ++k){
-				totalNumberSinLayer[j][k] += *listItNumSucinLayer;
-				varianceNumberSinLayer[j][k] += (int)pow((double)*listItNumSucinLayer,2);
-				totalNumberIinLayer[j][k] += *listItNumInfinLayer;
-				varianceNumberIinLayer[j][k] += (int)pow((double)*listItNumInfinLayer,2);
-				totalNumberRinLayer[j][k] += *listItNumReminLayer;
-				varianceNumberRinLayer[j][k] += (int)pow((double)*listItNumReminLayer,2);
-			}
-		}
-	}
-
-	ofstream myfile;
-	myfile.open ("Sc2-" + filename + ".txt");
-//	myfile << "S\n" ;
-	for (int i = 0 ; i < totalNumberS.size() ; i++)
-		myfile << totalNumberS[i]/numberOfRealizations << "\t" ;
-	myfile << "\n";
-//	myfile << "I\n" ;
-	for (int i = 0 ; i < totalNumberI.size() ; i++)
-			myfile << totalNumberI[i]/numberOfRealizations << "\t" ;
-	myfile << "\n";
-//	myfile << "R\n" ;
-	for (int i = 0 ; i < totalNumberR.size() ; i++)
-			myfile << totalNumberR[i]/numberOfRealizations << "\t" ;
-	myfile << "\n";
-	myfile << "variance\n";
-//	myfile << "S\n" ;
-	for (int i = 0 ; i < totalNumberS.size() ; i++)
-		myfile << sqrt(double(varianceNumberS[i]-pow((double)totalNumberS[i],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-	myfile << "\n";
-//	myfile << "I\n" ;
-	for (int i = 0 ; i < totalNumberI.size() ; i++)
-		myfile << sqrt(double(varianceNumberI[i]-pow((double)totalNumberI[i],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-	myfile << "\n";
-//	myfile << "R\n" ;
-	for (int i = 0 ; i < totalNumberR.size() ; i++)
-		myfile << sqrt(double(varianceNumberR[i]-pow((double)totalNumberR[i],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-	myfile << "\n";
-////		myfile << "Time\n" ;
-//	for (int i = 0 ; i < totalNumberS.size() ; i++)
-//				myfile << i << "\t" ;
-//	myfile << "\n" ;
-
-	for (int i = 0 ; i < totalNumberSinLayer.size() ; i++){
-		myfile << "layer " << i << "\n" ;
-		for (int j = 0 ; j < totalNumberSinLayer[i].size() ; j++)
-			myfile << totalNumberSinLayer[i][j]/numberOfRealizations << "\t" ;
-		myfile << "\n";
-		for (int j = 0 ; j < totalNumberIinLayer[i].size() ; j++)
-			myfile << totalNumberIinLayer[i][j]/numberOfRealizations << "\t" ;
-		myfile << "\n";
-		for (int j = 0 ; j < totalNumberRinLayer[i].size() ; j++)
-			myfile << totalNumberRinLayer[i][j]/numberOfRealizations << "\t" ;
-		myfile << "\n";
-		myfile << "variance\n";
-		for (int j = 0 ; j < totalNumberSinLayer[i].size() ; j++)
-			myfile << sqrt(double(varianceNumberSinLayer[i][j]-pow((double)totalNumberSinLayer[i][j],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-		myfile << "\n";
-		for (int j = 0 ; j < totalNumberIinLayer[i].size() ; j++)
-			myfile << sqrt(double(varianceNumberIinLayer[i][j]-pow((double)totalNumberIinLayer[i][j],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-		myfile << "\n";
-		for (int j = 0 ; j < totalNumberRinLayer[i].size() ; j++)
-			myfile << sqrt(double(varianceNumberRinLayer[i][j]-pow((double)totalNumberRinLayer[i][j],2)/numberOfRealizations)/numberOfRealizations) << "\t" ;
-		myfile << "\n";
-	}
-
-	myfile.close();
-}
-
-void SIRScenarios::thirdScenario(){
-}
-
-void SIRScenarios::fourthScenario(){
+void SIRScenarios::scenarioForErErNets(){
 	//Network Generation
 	const double WEEK = 0.1;
 	const double STRONG = 1.5;
 	const int numLayers = 2;
 	int nums[numLayers] = {10000,10000};
-	double avgs[numLayers] = {1.5,6};
+	double avgs[numLayers] = {6,6};
 	double interLayerInfo[1][3];
 			interLayerInfo[0][0] = 0;
 			interLayerInfo[0][1] = 1;
 
 	//SIR Model Run
 	int infectionTimeSpan = 5;//Recovery rate
-	for (int counter = 0 ; counter < 2 ; counter++){
+	double intralayerDiffRate = 0.01;
+	double interlayerDiffRate = 0.01;
+	for (int counter = 1 ; counter < 2 ; counter++){
 		if(counter == 0){
 			interLayerInfo[0][2] = WEEK;
 		}
@@ -279,20 +31,25 @@ void SIRScenarios::fourthScenario(){
 		}
 		MultipleNetwork mnet = erErModel::generate_ERER_MultipleNet_AvgDegreeBased(numLayers,nums,avgs,interLayerInfo,1);
 		print(mnet);
+		cout << "e0: " << mnet.getNetwork(0).getNumEdges() << endl;
+		cout << "e1: " << mnet.getNetwork(1).getNumEdges() << endl;
+		cout << "eInter: " << mnet.getNumInterlayerConnections() << endl;
 		vector<int> GCCSizeInLayer(mnet.getNumNetworks());
 		for (int layerNumber = 0 ; layerNumber < mnet.getNumNetworks() ; layerNumber++){
 			//Find the largest connected component size in each layer
 			GCCSizeInLayer[layerNumber] = mnet.getNetwork(layerNumber).getGCCSize();
+			cout << "gcc" << layerNumber << ": " << GCCSizeInLayer[layerNumber] << endl;
 		}
-		for(double intralayerDiffRate = 0.01 ; intralayerDiffRate <= 1.00 ; intralayerDiffRate += 0.05){
-			for(double interlayerDiffRate = 0.01 ; interlayerDiffRate <= 1.00 ; interlayerDiffRate += 0.05){
+		SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
+		for(intralayerDiffRate = 0.01 ; intralayerDiffRate <= 1.00 ; intralayerDiffRate += 0.05){
+			for(interlayerDiffRate = 0.01 ; interlayerDiffRate <= 1.00 ; interlayerDiffRate += 0.05){
+				sirModel.setDiffRates(intralayerDiffRate, interlayerDiffRate);
 				cout << "intra: " << intralayerDiffRate << ", inter: " << interlayerDiffRate << endl;
-				SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
 				//Find average of infected nodes in each layer
 				if(counter == 0)
-					SIRScenarios::fourthScenarioRun(sirModel, "week", GCCSizeInLayer);
+					SIRScenarios::scenarioForErErNetsBody(sirModel, "week", GCCSizeInLayer);
 				if(counter == 1)
-					SIRScenarios::fourthScenarioRun(sirModel, "strong", GCCSizeInLayer);
+					SIRScenarios::scenarioForErErNetsBody(sirModel, "strong", GCCSizeInLayer);
 			}
 			ofstream myfile;
 			string filename = "";
@@ -302,37 +59,68 @@ void SIRScenarios::fourthScenario(){
 			if(counter == 1){
 				filename = "strong";
 			}
-			myfile.open ("Sc4-"+filename+"AllS.txt",ios::app);
+			myfile.open ("Sc5-"+filename+"AllS.txt",ios::app);
 			myfile << "\n";
 			myfile.close();
-			myfile.open ("Sc4-"+filename+"AllI.txt",ios::app);
+			myfile.open ("Sc5-"+filename+"AllI.txt",ios::app);
 			myfile << "\n";
 			myfile.close();
-			myfile.open ("Sc4-"+filename+"AllR.txt",ios::app);
+			myfile.open ("Sc5-"+filename+"AllR.txt",ios::app);
 			myfile << "\n";
+			myfile.close();
+			myfile.open ("Sc5-"+filename+"AllSinTime.txt",ios::app);
+			myfile << "\n\n";
+			myfile.close();
+			myfile.open ("Sc5-"+filename+"AllIinTime.txt",ios::app);
+			myfile << "\n\n";
+			myfile.close();
+			myfile.open ("Sc5-"+filename+"AllRinTime.txt",ios::app);
+			myfile << "\n\n";
 			myfile.close();
 			for (int j = 0 ; j <  mnet.getNumNetworks() ; j++){
-				myfile.open ("Sc4-"+filename+ std::to_string(j) +"S.txt",ios::app);
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"S.txt",ios::app);
 				myfile << "\n" ;
 				myfile.close();
-				myfile.open ("Sc4-"+filename+ std::to_string(j) +"I.txt",ios::app);
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"I.txt",ios::app);
 				myfile << "\n" ;
 				myfile.close();
-				myfile.open ("Sc4-"+filename+ std::to_string(j) +"R.txt",ios::app);
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"R.txt",ios::app);
 				myfile << "\n" ;
+				myfile.close();
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"RGccRatio.txt",ios::app);
+				myfile << "\n" ;
+				myfile.close();
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"SinTime.txt",ios::app);
+				myfile << "\n\n" ;
+				myfile.close();
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"IinTime.txt",ios::app);
+				myfile << "\n\n" ;
+				myfile.close();
+				myfile.open ("Sc5-"+filename+ std::to_string(j) +"RinTime.txt",ios::app);
+				myfile << "\n\n" ;
 				myfile.close();
 			}
 		}
 	}
 }
 
-void SIRScenarios::fourthScenarioRun(SIRModel sirModel, string filename, vector<int> GCCSizeInLayer){
+void SIRScenarios::scenarioForErErNetsBody(SIRModel sirModel, string filename, vector<int> GCCSizeInLayer){
 	double avgNumberS = 0;
 	vector<double> avgNumberSinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
 	double avgNumberI = 0;
 	vector<double> avgNumberIinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
 	double avgNumberR = 0;
 	vector<double> avgNumberRinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	vector<double> avgRGccRatioinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	std::vector<double> totalNumberSInTime;
+	std::vector<std::vector<double> > totalNumberSinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberIInTime;
+	std::vector<std::vector<double> > totalNumberIinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberRInTime;
+	std::vector<std::vector<double> > totalNumberRinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+
 	double numberOfRealizations = 50;
 	for (int i = 0 ; i < numberOfRealizations ; i++){
 		simulationStats runTimeStat = sirModel.start();
@@ -343,6 +131,35 @@ void SIRScenarios::fourthScenarioRun(SIRModel sirModel, string filename, vector<
 			avgNumberSinLayer[j] += runTimeStat.SinLayer[j];
 			avgNumberIinLayer[j] += runTimeStat.IinLayer[j];
 			avgNumberRinLayer[j] += runTimeStat.RinLayer[j];
+//			avgRGccRatioinLayer[j] += (double)fifthScenarioGetSizeOfLargestInfectedClusterOnLayer(sirModel.mnet, sirModel, j)/(double)runTimeStat.R;
+		}
+		if(runTimeStat.numberOfSusceptibleinTime.size() > totalNumberSInTime.size()){
+			totalNumberSInTime.resize(runTimeStat.numberOfSusceptibleinTime.size(),0);
+			totalNumberIInTime.resize(runTimeStat.numberOfInfectedinTime.size(),0);
+			totalNumberRInTime.resize(runTimeStat.numberOfRemovedinTime.size(),0);
+		}
+		std::list<int>::iterator listItNumSuc=runTimeStat.numberOfSusceptibleinTime.begin();
+		std::list<int>::iterator listItNumInf=runTimeStat.numberOfInfectedinTime.begin();
+		std::list<int>::iterator listItNumRem=runTimeStat.numberOfRemovedinTime.begin();
+		for (int j = 0 ; listItNumSuc!=runTimeStat.numberOfSusceptibleinTime.end(); ++listItNumSuc, ++listItNumInf, ++listItNumRem, ++j){
+			totalNumberSInTime[j] += *listItNumSuc;
+			totalNumberIInTime[j] += *listItNumInf;
+			totalNumberRInTime[j] += *listItNumRem;
+		}
+		for (int j = 0 ; j < runTimeStat.SinLayer.size() ; j++){
+			if(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size() > totalNumberSinLayerInTime[j].size()){
+				totalNumberSinLayerInTime[j].resize(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size());
+				totalNumberIinLayerInTime[j].resize(runTimeStat.numberOfInfectedinTimeinLayer[j].size());
+				totalNumberRinLayerInTime[j].resize(runTimeStat.numberOfRemovedinTimeinLayer[j].size());
+			}
+			std::list<int>::iterator listItNumSucinLayer = runTimeStat.numberOfSusceptibleinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumInfinLayer = runTimeStat.numberOfInfectedinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumReminLayer = runTimeStat.numberOfRemovedinTimeinLayer[j].begin();
+			for (int k = 0 ; listItNumSucinLayer != runTimeStat.numberOfSusceptibleinTimeinLayer[j].end() ; ++listItNumSucinLayer, ++listItNumInfinLayer, ++listItNumReminLayer, ++k){
+				totalNumberSinLayerInTime[j][k] += *listItNumSucinLayer;
+				totalNumberIinLayerInTime[j][k] += *listItNumInfinLayer;
+				totalNumberRinLayerInTime[j][k] += *listItNumReminLayer;
+			}
 		}
 	}
 	avgNumberS /= numberOfRealizations;
@@ -352,26 +169,599 @@ void SIRScenarios::fourthScenarioRun(SIRModel sirModel, string filename, vector<
 		avgNumberSinLayer[j] /= numberOfRealizations;
 		avgNumberIinLayer[j] /= numberOfRealizations;
 		avgNumberRinLayer[j] /= numberOfRealizations;
+		avgRGccRatioinLayer[j] /= numberOfRealizations;
+//		cout << "avgRatio " << j << ": " <<  avgRGccRatioinLayer[j] << endl;
 	}
 	ofstream myfile;
-	myfile.open ("Sc4-"+filename+"AllS.txt",ios::app);
+	myfile.open ("Sc5-"+filename+"AllS.txt",ios::app);
 	myfile << avgNumberS << "\t" ;
 	myfile.close();
-	myfile.open ("Sc4-"+filename+"AllI.txt",ios::app);
+	myfile.open ("Sc5-"+filename+"AllI.txt",ios::app);
 	myfile << avgNumberI << "\t" ;
 	myfile.close();
-	myfile.open ("Sc4-"+filename+"AllR.txt",ios::app);
+	myfile.open ("Sc5-"+filename+"AllR.txt",ios::app);
 	myfile << avgNumberR << "\t" ;
 	myfile.close();
+	myfile.open ("Sc5-"+filename+"AllSinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberSInTime.size() ; i++)
+		myfile << totalNumberSInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc5-"+filename+"AllIinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberIInTime.size() ; i++)
+		myfile << totalNumberIInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc5-"+filename+"AllRinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberRInTime.size() ; i++)
+		myfile << totalNumberRInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
 	for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
-		myfile.open ("Sc4-"+filename+ std::to_string(j) +"S.txt",ios::app);
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"S.txt",ios::app);
 		myfile << avgNumberSinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
 		myfile.close();
-		myfile.open ("Sc4-"+filename+ std::to_string(j) +"I.txt",ios::app);
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"I.txt",ios::app);
 		myfile << avgNumberIinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
 		myfile.close();
-		myfile.open ("Sc4-"+filename+ std::to_string(j) +"R.txt",ios::app);
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"R.txt",ios::app);
 		myfile << avgNumberRinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"RGccRatio.txt",ios::app);
+		myfile << avgRGccRatioinLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"SinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberSinLayerInTime[j].size() ; k++)
+			myfile << totalNumberSinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"IinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberIinLayerInTime[j].size() ; k++)
+			myfile << totalNumberIinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc5-"+filename+ std::to_string(j) +"RinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberRinLayerInTime[j].size() ; k++)
+			myfile << totalNumberRinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+	}
+}
+
+int SIRScenarios::GetSizeOfLargestInfectedClusterOnLayer(MultipleNetwork& mnet, SIRModel& sirModel, network_id layerNumber){
+	vector<bool> vertexTraverseCheck(mnet.getNetwork(layerNumber).getNumVertexes(),false);
+	int infectedGccSize = 0;
+	for (int i = 0 ; i < vertexTraverseCheck.size() ; i++){
+		if(!vertexTraverseCheck[i]){
+			int tmpComponentSize = 0;
+			DFS(mnet, layerNumber, i, vertexTraverseCheck, tmpComponentSize, sirModel.vertexesStatus);
+			if(tmpComponentSize > infectedGccSize)
+				infectedGccSize = tmpComponentSize;
+		}
+	}
+	return infectedGccSize;
+}
+
+void SIRScenarios::DFS(MultipleNetwork& mnet, network_id layerNumber, vertex_id vid, vector<bool>& vertexTraverseCheck, int& componentSize, std::map<network_id,std::map<vertex_id,SIRVertexStatus > >& vertexesStatus){
+	if(!vertexTraverseCheck[vid]){
+		vertexTraverseCheck[vid] = true;
+		if(vertexesStatus[layerNumber][vid] == REMOVED){
+			componentSize++;
+			set<vertex_id> neighs;
+			mnet.getNetwork(layerNumber).getOutNeighbors(vid, neighs);
+			for(set<vertex_id>::iterator vertIt = neighs.begin() ; vertIt != neighs.end() ; ++vertIt){
+				DFS(mnet, layerNumber, *vertIt, vertexTraverseCheck, componentSize, vertexesStatus);
+			}
+		}
+	}
+}
+
+void SIRScenarios::scenarioForPolBlogs(){
+	//Network Generation
+	MultipleNetwork mnet = readNetFile::readPolBlogsGMLFile("polblogs.gml");
+	print(mnet);
+//	cout << "edges 0: " << mnet.getNetwork(0).getNumEdges() << endl;
+//	cout << "edges 1: " << mnet.getNetwork(1).getNumEdges() << endl;
+
+	//SIR Model Run
+	int infectionTimeSpan = 5;//Recovery rate
+	double intralayerDiffRate = 0.01;
+	double interlayerDiffRate = 0.01;
+	cout << "e0: " << mnet.getNetwork(0).getNumEdges() << endl;
+	cout << "e1: " << mnet.getNetwork(1).getNumEdges() << endl;
+	cout << "eInter: " << mnet.getNumInterlayerConnections() << endl;
+	vector<int> GCCSizeInLayer(mnet.getNumNetworks());
+	for (int layerNumber = 0 ; layerNumber < mnet.getNumNetworks() ; layerNumber++){
+		//Find the largest connected component size in each layer
+		GCCSizeInLayer[layerNumber] = mnet.getNetwork(layerNumber).getGCCSize();
+		cout << "gcc" << layerNumber << ": " << GCCSizeInLayer[layerNumber] << endl;
+	}
+	SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
+	for(intralayerDiffRate = 0.01 ; intralayerDiffRate <= 1.00 ; intralayerDiffRate += 0.05){
+		for(interlayerDiffRate = 0.01 ; interlayerDiffRate <= 1.00 ; interlayerDiffRate += 0.05){
+			sirModel.setDiffRates(intralayerDiffRate, interlayerDiffRate);
+			cout << "intra: " << intralayerDiffRate << ", inter: " << interlayerDiffRate << endl;
+			//Find average of infected nodes in each layer
+			SIRScenarios::scenarioForPolBlogsBody(sirModel, GCCSizeInLayer);
+		}
+		ofstream myfile;
+		myfile.open ("Sc6-AllS.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc6-AllI.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc6-AllR.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc6-AllSinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc6-AllIinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc6-AllRinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		for (int j = 0 ; j <  mnet.getNumNetworks() ; j++){
+			myfile.open ("Sc6-"+ std::to_string(j) +"S.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"I.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"R.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"RGccRatio.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"SinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"IinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc6-"+ std::to_string(j) +"RinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+		}
+	}
+}
+
+void SIRScenarios::scenarioForPolBlogsBody(SIRModel sirModel, vector<int> GCCSizeInLayer){
+	double avgNumberS = 0;
+	vector<double> avgNumberSinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+	double avgNumberI = 0;
+	vector<double> avgNumberIinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+	double avgNumberR = 0;
+	vector<double> avgNumberRinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	vector<double> avgRGccRatioinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	std::vector<double> totalNumberSInTime;
+	std::vector<std::vector<double> > totalNumberSinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberIInTime;
+	std::vector<std::vector<double> > totalNumberIinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberRInTime;
+	std::vector<std::vector<double> > totalNumberRinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+
+	double numberOfRealizations = 100;
+	for (int i = 0 ; i < numberOfRealizations ; i++){
+		simulationStats runTimeStat = sirModel.start();
+		avgNumberS += runTimeStat.S;
+		avgNumberI += runTimeStat.I;
+		avgNumberR += runTimeStat.R;
+		for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+			avgNumberSinLayer[j] += runTimeStat.SinLayer[j];
+			avgNumberIinLayer[j] += runTimeStat.IinLayer[j];
+			avgNumberRinLayer[j] += runTimeStat.RinLayer[j];
+//			avgRGccRatioinLayer[j] += (double)fifthScenarioGetSizeOfLargestInfectedClusterOnLayer(sirModel.mnet, sirModel, j)/(double)runTimeStat.R;
+		}
+		if(runTimeStat.numberOfSusceptibleinTime.size() > totalNumberSInTime.size()){
+			totalNumberSInTime.resize(runTimeStat.numberOfSusceptibleinTime.size(),0);
+			totalNumberIInTime.resize(runTimeStat.numberOfInfectedinTime.size(),0);
+			totalNumberRInTime.resize(runTimeStat.numberOfRemovedinTime.size(),0);
+		}
+		std::list<int>::iterator listItNumSuc=runTimeStat.numberOfSusceptibleinTime.begin();
+		std::list<int>::iterator listItNumInf=runTimeStat.numberOfInfectedinTime.begin();
+		std::list<int>::iterator listItNumRem=runTimeStat.numberOfRemovedinTime.begin();
+		for (int j = 0 ; listItNumSuc!=runTimeStat.numberOfSusceptibleinTime.end(); ++listItNumSuc, ++listItNumInf, ++listItNumRem, ++j){
+			totalNumberSInTime[j] += *listItNumSuc;
+			totalNumberIInTime[j] += *listItNumInf;
+			totalNumberRInTime[j] += *listItNumRem;
+		}
+		for (int j = 0 ; j < runTimeStat.SinLayer.size() ; j++){
+			if(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size() > totalNumberSinLayerInTime[j].size()){
+				totalNumberSinLayerInTime[j].resize(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size());
+				totalNumberIinLayerInTime[j].resize(runTimeStat.numberOfInfectedinTimeinLayer[j].size());
+				totalNumberRinLayerInTime[j].resize(runTimeStat.numberOfRemovedinTimeinLayer[j].size());
+			}
+			std::list<int>::iterator listItNumSucinLayer = runTimeStat.numberOfSusceptibleinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumInfinLayer = runTimeStat.numberOfInfectedinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumReminLayer = runTimeStat.numberOfRemovedinTimeinLayer[j].begin();
+			for (int k = 0 ; listItNumSucinLayer != runTimeStat.numberOfSusceptibleinTimeinLayer[j].end() ; ++listItNumSucinLayer, ++listItNumInfinLayer, ++listItNumReminLayer, ++k){
+				totalNumberSinLayerInTime[j][k] += *listItNumSucinLayer;
+				totalNumberIinLayerInTime[j][k] += *listItNumInfinLayer;
+				totalNumberRinLayerInTime[j][k] += *listItNumReminLayer;
+			}
+		}
+	}
+	avgNumberS /= numberOfRealizations;
+	avgNumberI /= numberOfRealizations;
+	avgNumberR /= numberOfRealizations;
+	for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+		avgNumberSinLayer[j] /= numberOfRealizations;
+		avgNumberIinLayer[j] /= numberOfRealizations;
+		avgNumberRinLayer[j] /= numberOfRealizations;
+		avgRGccRatioinLayer[j] /= numberOfRealizations;
+//		cout << "avgRatio " << j << ": " <<  avgRGccRatioinLayer[j] << endl;
+	}
+	ofstream myfile;
+	myfile.open ("Sc6-AllS.txt",ios::app);
+	myfile << avgNumberS << "\t" ;
+	myfile.close();
+	myfile.open ("Sc6-AllI.txt",ios::app);
+	myfile << avgNumberI << "\t" ;
+	myfile.close();
+	myfile.open ("Sc6-AllR.txt",ios::app);
+	myfile << avgNumberR << "\t" ;
+	myfile.close();
+	myfile.open ("Sc6-AllSinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberSInTime.size() ; i++)
+		myfile << totalNumberSInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc6-AllIinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberIInTime.size() ; i++)
+		myfile << totalNumberIInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc6-AllRinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberRInTime.size() ; i++)
+		myfile << totalNumberRInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+		myfile.open ("Sc6-"+ std::to_string(j) +"S.txt",ios::app);
+		myfile << avgNumberSinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"I.txt",ios::app);
+		myfile << avgNumberIinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"R.txt",ios::app);
+		myfile << avgNumberRinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"RGccRatio.txt",ios::app);
+		myfile << avgRGccRatioinLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"SinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberSinLayerInTime[j].size() ; k++)
+			myfile << totalNumberSinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"IinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberIinLayerInTime[j].size() ; k++)
+			myfile << totalNumberIinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc6-"+ std::to_string(j) +"RinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberRinLayerInTime[j].size() ; k++)
+			myfile << totalNumberRinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+	}
+}
+
+void SIRScenarios::scenarioForFlickrAndBlogCatalog(){
+	//Network Generation
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("blog1000.txt");
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("flickr1000.txt");
+	MultipleNetwork mnet = readNetFile::readFlickrAndBlogCatalogFile("flickr500.txt");
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("blog500.txt");
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("blog700.txt");
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("blog1000500.txt");
+//	MultipleNetwork mnet = readPolBlogsGML::readBlogsFile("blog1200.txt");
+	print(mnet);
+
+	//SIR Model Run
+	int infectionTimeSpan = 5;//Recovery rate
+	double intralayerDiffRate = 0.01;
+	double interlayerDiffRate = 0.01;
+	cout << "v0: " << mnet.getNetwork(0).getNumVertexes() << endl;
+	cout << "e0: " << mnet.getNetwork(0).getNumEdges() << endl;
+	cout << "v1: " << mnet.getNetwork(1).getNumVertexes() << endl;
+	cout << "e1: " << mnet.getNetwork(1).getNumEdges() << endl;
+	cout << "eInter: " << mnet.getNumInterlayerConnections() << endl;
+	vector<int> GCCSizeInLayer(mnet.getNumNetworks());
+	for (int layerNumber = 0 ; layerNumber < mnet.getNumNetworks() ; layerNumber++){
+		//Find the largest connected component size in each layer
+		GCCSizeInLayer[layerNumber] = mnet.getNetwork(layerNumber).getGCCSize();
+		cout << "gcc" << layerNumber << ": " << GCCSizeInLayer[layerNumber] << endl;
+	}
+	SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
+	for(intralayerDiffRate = 0.01 ; intralayerDiffRate <= 1.00 ; intralayerDiffRate += 0.05){
+		for(interlayerDiffRate = 0.01 ; interlayerDiffRate <= 1.00 ; interlayerDiffRate += 0.05){
+			sirModel.setDiffRates(intralayerDiffRate, interlayerDiffRate);
+			cout << "intra: " << intralayerDiffRate << ", inter: " << interlayerDiffRate << endl;
+			//Find average of infected nodes in each layer
+			SIRScenarios::scFlickrAndBlogCatalogAndSnapBody(sirModel, GCCSizeInLayer);
+		}
+		ofstream myfile;
+		myfile.open ("Sc7-AllS.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllI.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllR.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllSinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc7-AllIinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc7-AllRinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		for (int j = 0 ; j <  mnet.getNumNetworks() ; j++){
+			myfile.open ("Sc7-"+ std::to_string(j) +"S.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"I.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"R.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"RGccRatio.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"SinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"IinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"RinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+		}
+	}
+}
+
+void SIRScenarios::scenarioForSnapFiles(){
+	//Network Generation
+//	int numVert = 500;
+//	Network n1 = readPolBlogsGML::readSnapNetFile("SF02.txt", numVert);
+//	Network n2 = readPolBlogsGML::readSnapNetFile("SF05.txt", numVert);
+	int numVert = 1500;
+	Network n1 = readNetFile::readSnapNetFile("p21.txt", numVert);
+	Network n2 = readNetFile::readSnapNetFile("p29.txt", numVert);
+	MultipleNetwork mnet(false);
+	mnet.addNetwork(n1);
+	mnet.addNetwork(n2);
+//	double avgDegreeInter = 1.5;//Weekly
+//	double avgDegreeInter = 3;//Strongly
+//	double avgDegreeInter = 6;//Strongly For Power Laws
+	double avgDegreeInter = 0.5;//Weekly For Power Laws
+	double pInter = avgDegreeInter*(numVert + numVert)/(2 * numVert * numVert);
+	int v1 = 0;
+	int v2 = 0;
+	//Forming up Interlayer Connections
+	while (v1 < numVert - 1){
+		Random r;
+		double rand = r.getRandomDouble();
+		int incr = 0;
+		if(rand < pInter){
+			incr = 1;
+		}else{
+			incr = ceil(log(1-rand)/log(1-pInter));
+		}
+		while (v1 < numVert){
+			if (incr <= numVert - 1 - v2){
+				mnet.newInterlayerConnection(global_vertex_id(v1,0),global_vertex_id(v2,1));
+				v2 += incr;
+				break;
+			}else{
+				incr -= (numVert - 1 - v2);
+				v1++;
+				v2 = v1;
+			}
+		}
+	}
+	print(mnet);
+
+	//SIR Model Run
+	int infectionTimeSpan = 5;//Recovery rate
+	double intralayerDiffRate = 0.01;
+	double interlayerDiffRate = 0.01;
+	cout << "v0: " << mnet.getNetwork(0).getNumVertexes() << endl;
+	cout << "e0: " << mnet.getNetwork(0).getNumEdges() << endl;
+	cout << "v1: " << mnet.getNetwork(1).getNumVertexes() << endl;
+	cout << "e1: " << mnet.getNetwork(1).getNumEdges() << endl;
+	cout << "eInter: " << mnet.getNumInterlayerConnections() << endl;
+	vector<int> GCCSizeInLayer(mnet.getNumNetworks());
+	for (int layerNumber = 0 ; layerNumber < mnet.getNumNetworks() ; layerNumber++){
+		//Find the largest connected component size in each layer
+		GCCSizeInLayer[layerNumber] = mnet.getNetwork(layerNumber).getGCCSize();
+		cout << "gcc" << layerNumber << ": " << GCCSizeInLayer[layerNumber] << endl;
+	}
+	SIRModel sirModel = SIRModel(mnet, intralayerDiffRate, interlayerDiffRate, infectionTimeSpan);
+	for(intralayerDiffRate = 0.01 ; intralayerDiffRate <= 1.00 ; intralayerDiffRate += 0.05){
+		for(interlayerDiffRate = 0.01 ; interlayerDiffRate <= 1.00 ; interlayerDiffRate += 0.05){
+			sirModel.setDiffRates(intralayerDiffRate, interlayerDiffRate);
+			cout << "intra: " << intralayerDiffRate << ", inter: " << interlayerDiffRate << endl;
+			//Find average of infected nodes in each layer
+			SIRScenarios::scFlickrAndBlogCatalogAndSnapBody(sirModel, GCCSizeInLayer);
+		}
+		ofstream myfile;
+		myfile.open ("Sc7-AllS.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllI.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllR.txt",ios::app);
+		myfile << "\n";
+		myfile.close();
+		myfile.open ("Sc7-AllSinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc7-AllIinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		myfile.open ("Sc7-AllRinTime.txt",ios::app);
+		myfile << "\n\n";
+		myfile.close();
+		for (int j = 0 ; j <  mnet.getNumNetworks() ; j++){
+			myfile.open ("Sc7-"+ std::to_string(j) +"S.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"I.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"R.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"RGccRatio.txt",ios::app);
+			myfile << "\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"SinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"IinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+			myfile.open ("Sc7-"+ std::to_string(j) +"RinTime.txt",ios::app);
+			myfile << "\n\n" ;
+			myfile.close();
+		}
+	}
+}
+
+void SIRScenarios::scFlickrAndBlogCatalogAndSnapBody(SIRModel sirModel, vector<int> GCCSizeInLayer){
+	double avgNumberS = 0;
+	vector<double> avgNumberSinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+	double avgNumberI = 0;
+	vector<double> avgNumberIinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+	double avgNumberR = 0;
+	vector<double> avgNumberRinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	vector<double> avgRGccRatioinLayer = vector<double>(sirModel.getNetwork().getNumNetworks(),0);
+
+	std::vector<double> totalNumberSInTime;
+	std::vector<std::vector<double> > totalNumberSinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberIInTime;
+	std::vector<std::vector<double> > totalNumberIinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+	std::vector<double> totalNumberRInTime;
+	std::vector<std::vector<double> > totalNumberRinLayerInTime = vector<vector<double> >(sirModel.getNetwork().getNumNetworks());
+
+	double numberOfRealizations = 50;
+	for (int i = 0 ; i < numberOfRealizations ; i++){
+		simulationStats runTimeStat = sirModel.start();
+		avgNumberS += runTimeStat.S;
+		avgNumberI += runTimeStat.I;
+		avgNumberR += runTimeStat.R;
+		for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+			avgNumberSinLayer[j] += runTimeStat.SinLayer[j];
+			avgNumberIinLayer[j] += runTimeStat.IinLayer[j];
+			avgNumberRinLayer[j] += runTimeStat.RinLayer[j];
+//			avgRGccRatioinLayer[j] += (double)fifthScenarioGetSizeOfLargestInfectedClusterOnLayer(sirModel.mnet, sirModel, j)/(double)runTimeStat.R;
+		}
+		if(runTimeStat.numberOfSusceptibleinTime.size() > totalNumberSInTime.size()){
+			totalNumberSInTime.resize(runTimeStat.numberOfSusceptibleinTime.size(),0);
+			totalNumberIInTime.resize(runTimeStat.numberOfInfectedinTime.size(),0);
+			totalNumberRInTime.resize(runTimeStat.numberOfRemovedinTime.size(),0);
+		}
+		std::list<int>::iterator listItNumSuc=runTimeStat.numberOfSusceptibleinTime.begin();
+		std::list<int>::iterator listItNumInf=runTimeStat.numberOfInfectedinTime.begin();
+		std::list<int>::iterator listItNumRem=runTimeStat.numberOfRemovedinTime.begin();
+		for (int j = 0 ; listItNumSuc!=runTimeStat.numberOfSusceptibleinTime.end(); ++listItNumSuc, ++listItNumInf, ++listItNumRem, ++j){
+			totalNumberSInTime[j] += *listItNumSuc;
+			totalNumberIInTime[j] += *listItNumInf;
+			totalNumberRInTime[j] += *listItNumRem;
+		}
+		for (int j = 0 ; j < runTimeStat.SinLayer.size() ; j++){
+			if(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size() > totalNumberSinLayerInTime[j].size()){
+				totalNumberSinLayerInTime[j].resize(runTimeStat.numberOfSusceptibleinTimeinLayer[j].size());
+				totalNumberIinLayerInTime[j].resize(runTimeStat.numberOfInfectedinTimeinLayer[j].size());
+				totalNumberRinLayerInTime[j].resize(runTimeStat.numberOfRemovedinTimeinLayer[j].size());
+			}
+			std::list<int>::iterator listItNumSucinLayer = runTimeStat.numberOfSusceptibleinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumInfinLayer = runTimeStat.numberOfInfectedinTimeinLayer[j].begin();
+			std::list<int>::iterator listItNumReminLayer = runTimeStat.numberOfRemovedinTimeinLayer[j].begin();
+			for (int k = 0 ; listItNumSucinLayer != runTimeStat.numberOfSusceptibleinTimeinLayer[j].end() ; ++listItNumSucinLayer, ++listItNumInfinLayer, ++listItNumReminLayer, ++k){
+				totalNumberSinLayerInTime[j][k] += *listItNumSucinLayer;
+				totalNumberIinLayerInTime[j][k] += *listItNumInfinLayer;
+				totalNumberRinLayerInTime[j][k] += *listItNumReminLayer;
+			}
+		}
+	}
+	avgNumberS /= numberOfRealizations;
+	avgNumberI /= numberOfRealizations;
+	avgNumberR /= numberOfRealizations;
+	for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+		avgNumberSinLayer[j] /= numberOfRealizations;
+		avgNumberIinLayer[j] /= numberOfRealizations;
+		avgNumberRinLayer[j] /= numberOfRealizations;
+		avgRGccRatioinLayer[j] /= numberOfRealizations;
+//		cout << "avgRatio " << j << ": " <<  avgRGccRatioinLayer[j] << endl;
+	}
+	ofstream myfile;
+	myfile.open ("Sc7-AllS.txt",ios::app);
+	myfile << avgNumberS << "\t" ;
+	myfile.close();
+	myfile.open ("Sc7-AllI.txt",ios::app);
+	myfile << avgNumberI << "\t" ;
+	myfile.close();
+	myfile.open ("Sc7-AllR.txt",ios::app);
+	myfile << avgNumberR << "\t" ;
+	myfile.close();
+	myfile.open ("Sc7-AllSinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberSInTime.size() ; i++)
+		myfile << totalNumberSInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc7-AllIinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberIInTime.size() ; i++)
+		myfile << totalNumberIInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	myfile.open ("Sc7-AllRinTime.txt",ios::app);
+	for (int i = 0 ; i < totalNumberRInTime.size() ; i++)
+		myfile << totalNumberRInTime[i]/numberOfRealizations << "\t" ;
+	myfile << "\n" ;
+	myfile.close();
+	for (int j = 0 ; j <  avgNumberSinLayer.size() ; j++){
+		myfile.open ("Sc7-"+ std::to_string(j) +"S.txt",ios::app);
+		myfile << avgNumberSinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"I.txt",ios::app);
+		myfile << avgNumberIinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"R.txt",ios::app);
+		myfile << avgNumberRinLayer[j]/(double)GCCSizeInLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"RGccRatio.txt",ios::app);
+		myfile << avgRGccRatioinLayer[j] << "\t" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"SinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberSinLayerInTime[j].size() ; k++)
+			myfile << totalNumberSinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"IinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberIinLayerInTime[j].size() ; k++)
+			myfile << totalNumberIinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
+		myfile.close();
+		myfile.open ("Sc7-"+ std::to_string(j) +"RinTime.txt",ios::app);
+		for (int k = 0 ; k < totalNumberRinLayerInTime[j].size() ; k++)
+			myfile << totalNumberRinLayerInTime[j][k]/numberOfRealizations << "\t" ;
+		myfile << "\n" ;
 		myfile.close();
 	}
 }

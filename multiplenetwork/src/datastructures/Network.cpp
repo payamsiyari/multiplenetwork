@@ -448,11 +448,11 @@ int Network::getGCCSize(){
 	//TO DO: Assumes vertex Ids are from 0 to number of vertexes, needs to be fixed.
 	vector<bool> vertexTraverseCheck(getNumVertexes(),false);
 	int gccSize = 0;
-	int nextVertex = 0;
 	for (int i = 0 ; i < vertexTraverseCheck.size() ; i++){
 		if(!vertexTraverseCheck[i]){
 			int tmpComponentSize = 0;
-			DFS(nextVertex, vertexTraverseCheck, tmpComponentSize);
+			DFS(i, vertexTraverseCheck, tmpComponentSize);
+//			cout << "tsize: " << tmpComponentSize << endl;
 			if(tmpComponentSize > gccSize)
 				gccSize = tmpComponentSize;
 		}
@@ -466,6 +466,7 @@ void Network::DFS(vertex_id vid, vector<bool>& vertexTraverseCheck, int& compone
 		vertexTraverseCheck[vid] = true;
 		set<vertex_id> neighs;
 		getOutNeighbors(vid, neighs);
+//		cout << "sizeNeigh of " << vid << ": " << neighs.size() << endl;
 		for(set<vertex_id>::iterator vertIt = neighs.begin() ; vertIt != neighs.end() ; ++vertIt){
 			DFS(*vertIt, vertexTraverseCheck, componentSize);
 		}
